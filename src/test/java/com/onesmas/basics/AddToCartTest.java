@@ -1,6 +1,5 @@
 package com.onesmas.basics;
 
-
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -20,19 +19,18 @@ public class AddToCartTest extends BaseTest {
 
         wait.until(ExpectedConditions.and(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("inventory_item")),
-                ExpectedConditions.urlContains("inventory.html")
-        ));
-
+                ExpectedConditions.urlContains("inventory.html")));
 
         List<WebElement> products = driver.findElements(By.className("inventory_item"));
         assertEquals(6, products.size());
 
         WebElement firstProduct = products.getFirst();
-        String name = firstProduct.findElement(By.className("inventory_item_name")).getText();
+        String name =
+                firstProduct.findElement(By.className("inventory_item_name")).getText();
         firstProduct.findElement(By.tagName("button")).click();
 
-        WebElement badge = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.className("shopping_cart_badge")));
+        WebElement badge =
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("shopping_cart_badge")));
 
         assertEquals("1", badge.getText());
 
