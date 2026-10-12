@@ -22,7 +22,7 @@ abstract class BaseTest {
     @AfterEach
     void tearDown() {
         if (driver != null) {
-            driver.quit(); // NPE
+            driver.quit(); // null check: setUp may fail before the driver exists
         }
     }
 }

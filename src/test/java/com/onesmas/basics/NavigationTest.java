@@ -16,7 +16,7 @@ public class NavigationTest extends BaseTest{
         assertTrue(driver.getCurrentUrl().endsWith("/login"));
 
         driver.navigate().back();
-        assertEquals("https://the-internet.herokuapp.com",driver.getCurrentUrl());
+        assertEquals("https://the-internet.herokuapp.com/", driver.getCurrentUrl());
 
         driver.navigate().forward();
         driver.navigate().refresh();
