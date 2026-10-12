@@ -1,133 +1,128 @@
-# selenium-boiler
+# selenium-boiler: JavaScript
 
-Course project for Selenium WebDriver with Java, JUnit and Cucumber. Pull it before each class to get the latest tests.
+The course tests from `main`, written in JavaScript with Node.js. This branch holds only the JavaScript version; the Java version is on `main`. Each Java class has a matching file here, so you can compare them side by side.
 
-## Branches
-
-| Branch | Contents |
+| Java (`main`) | JavaScript (this branch) |
 | --- | --- |
-| `main` | Java (this README) |
-| `python` | Same tests in Python: see `python/README.md` on that branch |
-| `javascript` | Same tests in JavaScript: see `javascript/README.md` on that branch |
+| JUnit | Mocha |
+| Cucumber | Cucumber.js (same `login.feature`) |
+| `BaseTest.java` | `useBrowser()` in `test/support/browser.js` |
+| `DriverFactory.java` | `src/driverFactory.js` |
+| Cucumber HTML report | Mochawesome report + Cucumber HTML report |
 
 ## 1. Install
 
-| Tool | Version | Check with |
-| --- | --- | --- |
-| JDK | 21 | `java -version` |
-| Maven | 3.9 or newer | `mvn -v` (must show Java 21) |
-| Git | any | `git --version` |
-| Google Chrome | latest | |
-| IntelliJ IDEA | latest, with the **Cucumber for Java** plugin | |
+- Node.js 22.12 or newer: `node -v`
+- Google Chrome
 
-You don't need to download chromedriver. Selenium downloads the right driver on the first run.
-
-## 2. Get the project
+## 2. Set up
 
 ```bash
-git clone https://github.com/Onesmas78/selenium-boiler.git
-cd selenium-boiler
-mvn test-compile
+git clone --branch javascript https://github.com/Onesmas78/selenium-boiler.git selenium-javascript
+cd selenium-javascript
+npm install
 ```
-
-In IntelliJ: **File → Open**, pick the `selenium-boiler` folder, and set the project SDK to 21.
-
-Get updates before each class:
-
-```bash
-git pull
-```
-
-If `git pull` complains about your local changes, commit them first (`git add . && git commit -m "my work"`) and pull again.
 
 ## 3. What's inside
 
 ```
-src/test/java/com/onesmas/
-├── DriverFactory.java        Creates the browser (local or Grid)
-├── FirstTest.java            First test from the setup class
-├── RunCucumber.java          Runs the .feature files
-├── steps/LoginSteps.java     Cucumber step definitions
-└── basics/
-    ├── BaseTest.java         Opens and closes the browser for every test
-    ├── NavigationTest.java   Browser commands
-    ├── LocatorsTest.java     Locators
-    ├── InteractionsTest.java Clicking, typing, reading state
-    ├── WaitsTest.java        Explicit and fluent waits
-    ├── AddToCartTest.java    Everything together
-    ├── ExercisesTest.java    Your exercises
-    └── ExerciseSolutionsTest.java
-src/test/resources/features/login.feature
+selenium-javascript/
+├── package.json
+├── .mocharc.json                 Mocha settings (timeout, report)
+├── cucumber.js                   Cucumber settings (paths, report)
+├── src/driverFactory.js          Creates the browser (local or Grid)
+├── test/
+│   ├── support/browser.js        Opens/closes the browser, screenshot on failure
+│   ├── first.spec.js             First test from the setup class
+│   └── basics/
+│       ├── navigation.spec.js
+│       ├── locators.spec.js
+│       ├── interactions.spec.js
+│       ├── waits.spec.js
+│       ├── addToCart.spec.js
+│       ├── exercises.spec.js
+│       └── exerciseSolutions.spec.js
+└── features/
+    ├── login.feature
+    ├── step_definitions/login.steps.js
+    └── support/hooks.js          Browser per scenario, screenshot on failure
 ```
+
+Every Selenium call returns a Promise, so each one needs `await`:
+
+```js
+const { driver } = browser;
+await driver.get('https://the-internet.herokuapp.com');
+assert.equal(await driver.getTitle(), 'The Internet');
+```
+
+A missing `await` is the most common bug: the test moves on before the browser has finished.
 
 ## 4. Run the tests
 
-```bash
-mvn test                              # everything
-mvn test -Dtest=NavigationTest        # one class
-mvn test -Dtest=RunCucumber           # Cucumber scenarios only
-```
-
-Or click the green arrow next to a class or test in IntelliJ.
-
-Cucumber report: open `target/cucumber-reports/cucumber.html` after a run. Failed scenarios include a screenshot.
-
-## 5. Choose a browser
+Run these from the project folder:
 
 ```bash
-mvn test -Dbrowser=firefox            # chrome (default), firefox, edge, safari
+npm test                                      # all Mocha tests
+npx mocha test/basics/navigation.spec.js      # one file
+npx mocha --grep checkbox                     # tests whose name contains "checkbox"
+npm run test:bdd                              # feature-file scenarios
 ```
 
-The browser must be installed. For Safari (macOS only), first run `safaridriver --enable` once and turn on **Develop → Allow Remote Automation** in Safari.
+Reports:
+- Mocha: `reports/report.html`
+- Cucumber: `reports/cucumber.html`
 
-## 6. Run on Selenium Grid
+Failed tests include a screenshot.
 
-Add `-Dgrid.url`. The browser opens on the Grid instead of your machine.
+## 5. Choose a browser or use a Grid
 
-**Grid on your own machine** (needs Java only):
+Settings come from environment variables:
 
 ```bash
-curl -LO https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.51.0/selenium-server-4.51.0.jar
-java -jar selenium-server-4.51.0.jar standalone --selenium-manager true
+BROWSER=firefox npm test                                  # chrome (default), firefox, edge, safari
+GRID_URL=http://localhost:4444 BROWSER=firefox npm test   # run on a Grid
 ```
 
-Leave that running, then in another terminal:
-
-```bash
-mvn test -Dgrid.url=http://localhost:4444 -Dbrowser=firefox
-```
-
-Open `http://localhost:4444/ui` to see the Grid.
-
-**Class Grid:** use the URL, username and password your instructor gives you.
+For the class Grid, also set the login from your instructor:
 
 ```bash
 export GRID_USER=student
 export GRID_PASS='<password from class>'
-mvn test -Dgrid.url=http://<grid-ip>:4444 -Dbrowser=chrome
+GRID_URL=http://<grid-ip>:4444 npm test
 ```
 
-On Windows PowerShell use `$env:GRID_USER="student"` and `$env:GRID_PASS="..."` instead of `export`.
+On Windows PowerShell, set each variable first (`$env:BROWSER="firefox"`), then run `npm test`.
 
-## 7. Exercises
+See the README on the `main` branch for how to start a Grid on your own machine.
 
-1. Open `basics/ExercisesTest.java`.
-2. Delete the `@Disabled` line above the class.
-3. Replace each `fail("TODO")` with your code and run `mvn test -Dtest=ExercisesTest`.
-4. Compare with `ExerciseSolutionsTest.java` when you're done.
+## 6. Exercises
 
-## Practice sites
+1. Open `test/basics/exercises.spec.js`.
+2. Change `describe.skip(` to `describe(`.
+3. Replace each `assert.fail('TODO')` with your code.
+4. Run `npx mocha test/basics/exercises.spec.js`, then compare with `exerciseSolutions.spec.js`.
 
-- https://the-internet.herokuapp.com
-- https://www.saucedemo.com: users `standard_user` and `locked_out_user`, password `secret_sauce`
+## Java to JavaScript cheat sheet
+
+| Java | JavaScript |
+| --- | --- |
+| `driver.findElement(By.id("x"))` | `await driver.findElement(By.id('x'))` |
+| `By.cssSelector("...")` | `By.css('...')` |
+| `el.sendKeys("a")` / `el.getText()` | `await el.sendKeys('a')` / `await el.getText()` |
+| `driver.navigate().back()` | `await driver.navigate().back()` |
+| `el.getDomProperty("value")` | `await el.getProperty('value')` |
+| `wait.until(ExpectedConditions.visibilityOfElementLocated(by))` | `await driver.wait(until.elementIsVisible(el), 10000)` |
+| `assertEquals(a, b)` | `assert.equal(a, b)` |
+| `assertEquals(el1, el2)` | `assert.ok(await WebElement.equals(el1, el2))` |
+| `@Disabled` | `it.skip(...)` / `describe.skip(...)` |
 
 ## Troubleshooting
 
 | Problem | Fix |
 | --- | --- |
-| `mvn -v` shows a Java version other than 21 | Set `JAVA_HOME` to your JDK 21 folder and open a new terminal |
-| `release version 21 not supported` | Same as above; in IntelliJ also set the project SDK to 21 |
-| `SessionNotCreatedException` | Update the browser, check your internet, run again |
-| `NoSuchElementException` | Check the locator in Chrome DevTools (Ctrl+F in Elements); add a wait |
-| Firefox won't start on Ubuntu | The snap Firefox doesn't work with Selenium: use Chrome |
-| `401` from the Grid | `GRID_USER` / `GRID_PASS` not set in this terminal |
+| `Cannot find module 'selenium-webdriver'` | Run `npm install` in the project folder |
+| `Unsupported engine` or syntax errors on install | Update Node.js to 22.12 or newer |
+| `Timeout of 60000ms exceeded` | The page or browser is slow; check your internet and the locator |
+| `function timed out` in Cucumber | Same as above |
+| `NoSuchElementError` | Check the locator in Chrome DevTools; add a wait |
