@@ -1,5 +1,6 @@
 package com.onesmas.steps;
 
+import com.onesmas.DriverFactory;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -17,7 +18,7 @@ public class LoginSteps {
 
     @Before
     void setUp() {
-        driver = new ChromeDriver();
+        driver = DriverFactory.create();
     }
 
     @After
