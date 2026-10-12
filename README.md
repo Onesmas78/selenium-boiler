@@ -7,8 +7,10 @@ Course project for Selenium WebDriver with Java, JUnit and Cucumber. Pull it bef
 | Branch | Contents |
 | --- | --- |
 | `main` | Java (this README) |
-| `python` | Same tests in Python: see `python/README.md` on that branch |
-| `javascript` | Same tests in JavaScript: see `javascript/README.md` on that branch |
+| `python` | Same tests in Python only. Its README explains setup |
+| `javascript` | Same tests in JavaScript only. Its README explains setup |
+
+To get just one language: `git clone --branch python https://github.com/Onesmas78/selenium-boiler.git` (or `--branch javascript`).
 
 ## 1. Install
 
